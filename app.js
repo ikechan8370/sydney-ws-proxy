@@ -20,8 +20,19 @@ const socketProxy = createProxyMiddleware({
         'x-forwarded-for': generateRandomIP(),
     }
 });
+const createConversationProxy = createProxyMiddleware({
+    target: 'https://www.bing.com',
+    pathRewrite: {
+        // '^/': '/edgesvc/', // rewrite path
+    },
+    changeOrigin: true,
+    // pathFilter: '/turing/conversation/create',
+    // agent: socks5Agent,
+})
 // Proxy WebSocket requests
 app.use('/sydney/ChatHub', socketProxy);
+app.use('/turing/conversation/create', createConversationProxy)
+app.use('/images/create', createConversationProxy)
 
 // Start the server
 const port = 3000;  // Replace with your desired port number
