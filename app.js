@@ -28,12 +28,22 @@ const createConversationProxy = createProxyMiddleware({
     changeOrigin: true,
     // pathFilter: '/turing/conversation/create',
     // agent: socks5Agent,
+    headers: {
+        origin: 'https://www.bing.com',
+        Referer: 'https://www.bing.com/search?q=Bing+AI&showconv=1&FORM=hpcodx',
+        'x-forwarded-for': generateRandomIP(),
+    }
 })
 const imageProxy = createProxyMiddleware({
     target: 'https://www.bing.com',
     changeOrigin: true,
     // pathFilter: '/turing/conversation/create',
     // agent: socks5Agent,
+    headers: {
+        origin: 'https://www.bing.com',
+        Referer: 'https://www.bing.com/search?q=Bing+AI&showconv=1&FORM=hpcodx',
+        'x-forwarded-for': generateRandomIP(),
+    }
 })
 // Proxy WebSocket requests
 app.use('/sydney/ChatHub', socketProxy);
