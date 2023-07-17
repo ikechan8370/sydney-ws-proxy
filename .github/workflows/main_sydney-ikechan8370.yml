@@ -12,7 +12,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    if: startsWith(github.repository, 'ikechan8370/sydney-ws-proxy')
     steps:
       - uses: actions/checkout@v2
 
@@ -39,6 +39,7 @@ jobs:
     environment:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+    if: startsWith(github.repository, 'ikechan8370/sydney-ws-proxy')
 
     steps:
       - name: Download artifact from build job
