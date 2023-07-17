@@ -21,10 +21,16 @@ const socketProxy = createProxyMiddleware({
     }
 });
 const createConversationProxy = createProxyMiddleware({
-    target: 'https://www.bing.com',
+    target: 'https://edgeservices.bing.com',
     pathRewrite: {
-        // '^/': '/edgesvc/', // rewrite path
+        '^/': '/edgesvc/', // rewrite path
     },
+    changeOrigin: true,
+    // pathFilter: '/turing/conversation/create',
+    // agent: socks5Agent,
+})
+const imageProxy = createProxyMiddleware({
+    target: 'https://www.bing.com',
     changeOrigin: true,
     // pathFilter: '/turing/conversation/create',
     // agent: socks5Agent,
@@ -32,7 +38,7 @@ const createConversationProxy = createProxyMiddleware({
 // Proxy WebSocket requests
 app.use('/sydney/ChatHub', socketProxy);
 app.use('/turing/conversation/create', createConversationProxy)
-app.use('/images/create', createConversationProxy)
+app.use('/images/create', imageProxy)
 
 // Start the server
 const port = 3000;  // Replace with your desired port number
