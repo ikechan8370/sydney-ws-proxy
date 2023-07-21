@@ -128,7 +128,7 @@ app.post('/images/create', async (req, res) => {
             });
             res.redirect(headers.get('location'))
         } else {
-            res.status(500)
+            res.send("failed: " + result.status)
         }
     })
 
