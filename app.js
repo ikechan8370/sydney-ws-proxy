@@ -1,12 +1,12 @@
 const express = require('express');
 const { createProxyMiddleware } = require('http-proxy-middleware');
-// const {HttpsProxyAgent} = require('https-proxy-agent');
+const {HttpsProxyAgent} = require('https-proxy-agent');
 const axios = require("axios");
 
 // HTTP Proxy
-// const httpProxyUrl = 'http://127.0.0.1:7890';
-// const socks5Agent = new HttpsProxyAgent(httpProxyUrl);
-
+const httpProxyUrl = 'http://127.0.0.1:7890';
+const socks5Agent = new HttpsProxyAgent(httpProxyUrl);
+const useProxy = !!httpProxyUrl;
 // Create Express app
 const app = express();
 const socketProxy = createProxyMiddleware({
@@ -14,7 +14,7 @@ const socketProxy = createProxyMiddleware({
     pathFilter: '/sydney/ChatHub',
     ws: true,
     changeOrigin: true,
-    // agent: socks5Agent,
+    agent: useProxy ? socks5Agent : undefined,
     headers: {
         origin: 'https://www.bing.com',
         Referer: 'https://www.bing.com/search?q=Bing+AI&showconv=1&FORM=hpcodx',
@@ -28,7 +28,7 @@ const createConversationProxy = createProxyMiddleware({
     },
     changeOrigin: true,
     // pathFilter: '/turing/conversation/create',
-    // agent: socks5Agent,
+    agent: useProxy ? socks5Agent : undefined,
     headers: {
         origin: 'https://www.bing.com',
         Referer: 'https://www.bing.com/search?q=Bing+AI&showconv=1&FORM=hpcodx',
@@ -39,7 +39,7 @@ const imageProxy = createProxyMiddleware({
     target: 'https://www.bing.com',
     changeOrigin: true,
     // pathFilter: '/turing/conversation/create',
-    // agent: socks5Agent,
+    agent: useProxy ? socks5Agent : undefined,
     headers: {
         origin: 'https://www.bing.com',
         Referer: 'https://www.bing.com/search?q=Bing+AI&showconv=1&FORM=hpcodx',
@@ -49,8 +49,10 @@ const imageProxy = createProxyMiddleware({
 // Proxy WebSocket requests
 app.use('/sydney/ChatHub', socketProxy);
 app.use('/turing/conversation/create', createConversationProxy)
-// app.use('/images/create', imageProxy)
+app.use('/images/kblob', imageProxy)
+app.use('/images/create/async', imageProxy)
 app.use('/edgesvc/turing/captcha/create', async (req, res) => {
+    console.log(req.headers.cookie)
     let result = await axios.get("https://edgeservices.bing.com/edgesvc/turing/captcha/create", {
         responseType: 'arraybuffer',
         headers: {
@@ -58,7 +60,7 @@ app.use('/edgesvc/turing/captcha/create', async (req, res) => {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.1823.82',
             Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
         },
-        // httpsAgent: socks5Agent,
+        httpsAgent: useProxy ? socks5Agent : undefined,
     })
     const headers = result.headers;
     Object.keys(headers).forEach((headerName) => {
@@ -67,6 +69,7 @@ app.use('/edgesvc/turing/captcha/create', async (req, res) => {
     res.send(result.data);
 })
 app.use('/edgesvc/turing/captcha/verify', async (req, res) => {
+    console.log(req.headers.cookie)
     let result = await axios.get("https://edgeservices.bing.com/edgesvc/turing/captcha/verify", {
         params: req.query,
         headers: {
@@ -74,7 +77,7 @@ app.use('/edgesvc/turing/captcha/verify', async (req, res) => {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.1823.82',
             Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
         },
-        // httpsAgent: socks5Agent,
+        httpsAgent: useProxy ? socks5Agent : undefined,
     })
     const headers = result.headers;
     Object.keys(headers).forEach((headerName) => {
@@ -82,8 +85,8 @@ app.use('/edgesvc/turing/captcha/verify', async (req, res) => {
     });
     res.send(result.data);
 })
+
 app.post('/images/create', async (req, res) => {
-    console.log("images")
     axios.request({
         url: "https://www.bing.com/images/create",
         data: req.body,
@@ -115,7 +118,7 @@ app.post('/images/create', async (req, res) => {
             'Referrer-Policy': 'origin-when-cross-origin',
             'x-edge-shopping-flag': '1'
         },
-        // httpsAgent: socks5Agent,
+        httpsAgent: useProxy ? socks5Agent : undefined,
         maxRedirects: 0,
         validateStatus: (status) => {
             return status === 302 || (status >= 200 && status < 300); // 自定义响应状态码的验证函数
