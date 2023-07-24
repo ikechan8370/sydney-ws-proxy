@@ -6,7 +6,7 @@ const axios = require("axios");
 // HTTP Proxy
 const httpProxyUrl = 'http://127.0.0.1:7890';
 const socks5Agent = new HttpsProxyAgent(httpProxyUrl);
-const useProxy = !!httpProxyUrl;
+const useProxy = false;
 // Create Express app
 const app = express();
 const socketProxy = createProxyMiddleware({
