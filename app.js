@@ -1,12 +1,11 @@
 const express = require('express');
 const { createProxyMiddleware } = require('http-proxy-middleware');
-// const {HttpsProxyAgent} = require('https-proxy-agent');
+const {HttpsProxyAgent} = require('https-proxy-agent');
 const axios = require("axios");
 
 // HTTP Proxy
-// const httpProxyUrl = 'http://127.0.0.1:7890';
-// const socks5Agent = new HttpsProxyAgent(httpProxyUrl);
-
+const httpProxyUrl = 'http://127.0.0.1:7890';
+const socks5Agent = new HttpsProxyAgent(httpProxyUrl);
 // Create Express app
 const app = express();
 const socketProxy = createProxyMiddleware({
@@ -83,7 +82,38 @@ app.use('/edgesvc/turing/captcha/verify', async (req, res) => {
     res.send(result.data);
 })
 app.post('/images/create', async (req, res) => {
-    console.log("images")
+    // console.log("images")
+    let cookie = req.headers.cookie
+    console.log(cookie)
+    if (!cookie) {
+        res.status(401)
+        res.send("failed: " + 'no token')
+        return
+    }
+    try {
+        let u = cookie.split(";").find(c => c.includes('_U')).replace('_U=', '').replace(';', '')
+        console.log(u)
+        const myHeaders = new Headers();
+        myHeaders.append("Content-Type", "application/json");
+        let userInfo = await fetch('http://bingcaptcha.ikechan8370.com/user', {
+            method: 'POST',
+            body: JSON.stringify({
+                _U: u
+            }),
+            headers: myHeaders
+        })
+        let user = await userInfo.json()
+        if (!user.success) {
+            res.status(401)
+            res.send("failed: " + user.error)
+            return
+        } else {
+            console.log("user: " + user.user)
+        }
+    } catch (err) {
+        console.warn('query user info by token failed')
+        console.warn(err)
+    }
     axios.request({
         url: "https://www.bing.com/images/create",
         data: req.body,
@@ -97,7 +127,7 @@ app.post('/images/create', async (req, res) => {
             referrer: 'https://www.bing.com/images/create/',
             origin: 'https://www.bing.com',
             'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36 Edg/113.0.1774.50',
-            Cookie: req.headers.cookie,
+            Cookie: cookie,
             Dnt: '1',
             'sec-ch-ua': '"Microsoft Edge";v="113", "Chromium";v="113", "Not-A.Brand";v="24"',
             'sec-ch-ua-arch': '"x86"',
@@ -122,14 +152,20 @@ app.post('/images/create', async (req, res) => {
         },
     }).then(result => {
         if (result.status === 302) {
+            console.log("success")
             const headers = result.headers;
             Object.keys(headers).forEach((headerName) => {
                 res.set(headerName, headers[headerName]);
             });
             res.redirect(headers.get('location'))
         } else {
+
+            console.log("failed: " + result.status)
             res.send("failed: " + result.status)
         }
+    }).catch(err => {
+        console.warn(err)
+        res.send("failed")
     })
 
 })
