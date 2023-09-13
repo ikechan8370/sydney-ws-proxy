@@ -2,13 +2,15 @@ const express = require('express');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 const {HttpsProxyAgent} = require('https-proxy-agent');
 const axios = require("axios");
-
+const initCycleTLS = require('cycletls')
+const cookieParser = require('cookie-parser');
 // HTTP Proxy
 const httpProxyUrl = 'http://127.0.0.1:7890';
 const socks5Agent = new HttpsProxyAgent(httpProxyUrl);
 const useProxy = false;
 // Create Express app
 const app = express();
+app.use(cookieParser());
 const socketProxy = createProxyMiddleware({
     target: 'https://sydney.bing.com',
     pathFilter: '/sydney/ChatHub',
@@ -174,6 +176,89 @@ app.post('/images/create', async (req, res) => {
     })
 
 })
+
+const JA3 = '772,4865-4866-4867-49195-49199-49196-49200-52393-52392-49171-49172-156-157-47-53,27-5-65281-13-35-0-51-18-16-43-10-45-11-17513-23,29-23-24,0';
+app.post('/api/organizations/:organizationId/chat_conversations', async (req, res) => {
+    const organizationId = req.params.organizationId;
+    const sessionKey = req.cookies.sessionKey;
+    const cycleTLS = await initCycleTLS()
+    let headers = new Headers()
+    headers.append('Cookie', `sessionKey=${sessionKey}`)
+    headers.append('referrer', 'https://claude.ai/chat')
+    headers.append('origin', 'https://claude.ai')
+    headers.append('Content-Type', 'application/json')
+    headers.append('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36')
+    // headers.append('sec-ch-ua', '"Chromium";v="116", "Not)A;Brand";v="24", "Google Chrome";v="116"')
+    // headers.append('Sec-Ch-Ua-Mobile', '?0')
+    // headers.append('Sec-Ch-Ua-Platform', '"Windows"')
+    headers.append('Sec-Fetch-Dest', 'empty')
+    headers.append('Sec-Fetch-Mode', 'cors')
+    headers.append('Sec-Fetch-Site', 'same-origin')
+    headers.append('Connection', 'keep-alive')
+    headers.append('TE', 'trailers')
+    headers.append('Accept-Encoding', 'gzip, deflate, br')
+    headers.append('Accept-Language', 'en-US,en;q=0.5')
+    headers.append('Dnt', '1')
+    headers.append('Accept', '*/*')
+    let rawHeaders = {}
+    Array.from(this.headers.keys()).forEach(key => {
+        rawHeaders[key] = headers.get(key)
+    })
+    let result = await cycleTLS(`https://claude.ai/api/organizations/${organizationId}/chat_conversations`, {
+        ja3: JA3,
+        userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36',
+        body: JSON.stringify(req.body),
+        headers: rawHeaders,
+        disableRedirect: true
+    }, 'post')
+    if (result.status === 200) {
+        res.json(result.body);
+    } else {
+        res.status(307)
+    }
+
+});
+
+app.post('/api/append_message', async (req, res) => {
+    const sessionKey = req.cookies.sessionKey;
+    const cycleTLS = await initCycleTLS()
+    let headers = new Headers()
+    headers.append('Cookie', `sessionKey=${sessionKey}`)
+    headers.append('referrer', 'https://claude.ai/chat')
+    headers.append('origin', 'https://claude.ai')
+    headers.append('Content-Type', 'application/json')
+    headers.append('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36')
+    // headers.append('sec-ch-ua', '"Chromium";v="116", "Not)A;Brand";v="24", "Google Chrome";v="116"')
+    // headers.append('Sec-Ch-Ua-Mobile', '?0')
+    // headers.append('Sec-Ch-Ua-Platform', '"Windows"')
+    headers.append('Sec-Fetch-Dest', 'empty')
+    headers.append('Sec-Fetch-Mode', 'cors')
+    headers.append('Sec-Fetch-Site', 'same-origin')
+    headers.append('Connection', 'keep-alive')
+    headers.append('TE', 'trailers')
+    headers.append('Accept-Encoding', 'gzip, deflate, br')
+    headers.append('Accept-Language', 'en-US,en;q=0.5')
+    headers.append('Dnt', '1')
+    headers.append('Accept', '*/*')
+    let rawHeaders = {}
+    Array.from(this.headers.keys()).forEach(key => {
+        rawHeaders[key] = headers.get(key)
+    })
+    let result = await cycleTLS(`https://claude.ai/api/append_message`, {
+        ja3: JA3,
+        userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36',
+        body: JSON.stringify(req.body),
+        headers: rawHeaders,
+        disableRedirect: true
+    }, 'post')
+    if (result.status === 200) {
+        res.json(result.body);
+    } else {
+        res.status(307)
+    }
+
+});
+
 // Start the server
 const port = 3000;  // Replace with your desired port number
 app.listen(port, () => {
