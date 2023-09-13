@@ -11,6 +11,7 @@ const useProxy = false;
 // Create Express app
 const app = express();
 app.use(cookieParser());
+app.use(express.json());
 const socketProxy = createProxyMiddleware({
     target: 'https://sydney.bing.com',
     pathFilter: '/sydney/ChatHub',
@@ -181,6 +182,7 @@ const JA3 = '772,4865-4866-4867-49195-49199-49196-49200-52393-52392-49171-49172-
 app.post('/api/organizations/:organizationId/chat_conversations', async (req, res) => {
     const organizationId = req.params.organizationId;
     const sessionKey = req.cookies.sessionKey;
+    console.log(sessionKey)
     const cycleTLS = await initCycleTLS()
     let headers = new Headers()
     headers.append('Cookie', `sessionKey=${sessionKey}`)
@@ -245,7 +247,6 @@ app.post('/api/append_message', async (req, res) => {
     Array.from(headers.keys()).forEach(key => {
         rawHeaders[key] = headers.get(key)
     })
-    console.log(req.body)
     let result = await cycleTLS(`https://claude.ai/api/append_message`, {
         ja3: JA3,
         userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36',
