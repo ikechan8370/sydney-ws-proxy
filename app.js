@@ -216,7 +216,6 @@ app.post('/api/organizations/:organizationId/chat_conversations', async (req, re
     } else {
         res.status(result.status)
         res.send(result.body)
-        res.header('Location', result.headers.location)
     }
 
 });
@@ -259,7 +258,6 @@ app.post('/api/append_message', async (req, res) => {
     } else {
         res.status(result.status)
         res.send(result.body)
-        res.header('Location', result.headers.location)
     }
 
 });
