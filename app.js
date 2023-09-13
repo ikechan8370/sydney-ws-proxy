@@ -214,7 +214,9 @@ app.post('/api/organizations/:organizationId/chat_conversations', async (req, re
     if (result.status === 200) {
         res.json(result.body);
     } else {
-        res.status(307)
+        res.status(result.status)
+        res.send(result.body)
+        res.header('Location', result.headers.location)
     }
 
 });
@@ -244,6 +246,7 @@ app.post('/api/append_message', async (req, res) => {
     Array.from(headers.keys()).forEach(key => {
         rawHeaders[key] = headers.get(key)
     })
+    console.log(req.body)
     let result = await cycleTLS(`https://claude.ai/api/append_message`, {
         ja3: JA3,
         userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36',
@@ -254,7 +257,9 @@ app.post('/api/append_message', async (req, res) => {
     if (result.status === 200) {
         res.json(result.body);
     } else {
-        res.status(307)
+        res.status(result.status)
+        res.send(result.body)
+        res.header('Location', result.headers.location)
     }
 
 });
