@@ -201,7 +201,7 @@ app.post('/api/organizations/:organizationId/chat_conversations', async (req, re
     headers.append('Dnt', '1')
     headers.append('Accept', '*/*')
     let rawHeaders = {}
-    Array.from(this.headers.keys()).forEach(key => {
+    Array.from(headers.keys()).forEach(key => {
         rawHeaders[key] = headers.get(key)
     })
     let result = await cycleTLS(`https://claude.ai/api/organizations/${organizationId}/chat_conversations`, {
@@ -241,7 +241,7 @@ app.post('/api/append_message', async (req, res) => {
     headers.append('Dnt', '1')
     headers.append('Accept', '*/*')
     let rawHeaders = {}
-    Array.from(this.headers.keys()).forEach(key => {
+    Array.from(headers.keys()).forEach(key => {
         rawHeaders[key] = headers.get(key)
     })
     let result = await cycleTLS(`https://claude.ai/api/append_message`, {
