@@ -252,15 +252,16 @@ app.post('/api/append_message', async (req, res) => {
         userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36',
         body: JSON.stringify(req.body),
         headers: rawHeaders,
-        disableRedirect: true
+        disableRedirect: true,
+        proxy: 'http://127.0.0.1:7890',
+        timeout: 120
     }, 'post')
     if (result.status === 200) {
-        res.json(result.body);
+        res.send(result.body);
     } else {
         res.status(result.status)
         res.send(result.body)
     }
-
 });
 
 // Start the server
