@@ -222,8 +222,10 @@ app.post('/api/organizations/:organizationId/chat_conversations', async (req, re
 
 });
 
-app.post('/api/append_message', async (req, res) => {
+app.post('/api/organizations/:organizationId/chat_conversations/:conversationId/completion', async (req, res) => {
     const sessionKey = req.cookies.sessionKey;
+    const organizationId = req.params.organizationId;
+    const conversationId = req.params.conversationId;
     const cycleTLS = await initCycleTLS()
     let headers = new Headers()
     headers.append('Cookie', `sessionKey=${sessionKey}`)
@@ -247,13 +249,13 @@ app.post('/api/append_message', async (req, res) => {
     Array.from(headers.keys()).forEach(key => {
         rawHeaders[key] = headers.get(key)
     })
-    let result = await cycleTLS(`https://claude.ai/api/append_message`, {
+    let result = await cycleTLS(`https://claude.ai/api/organizations/organizationId/chat_conversations/conversationId/completion`, {
         ja3: JA3,
         userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36',
         body: JSON.stringify(req.body),
         headers: rawHeaders,
         disableRedirect: true,
-        proxy: 'http://127.0.0.1:7890',
+        // proxy: 'http://127.0.0.1:7890',
         timeout: 120
     }, 'post')
     if (result.status === 200) {
