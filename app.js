@@ -249,7 +249,7 @@ app.post('/api/organizations/:organizationId/chat_conversations/:conversationId/
     Array.from(headers.keys()).forEach(key => {
         rawHeaders[key] = headers.get(key)
     })
-    let result = await cycleTLS(`https://claude.ai/api/organizations/organizationId/chat_conversations/conversationId/completion`, {
+    let result = await cycleTLS(`https://claude.ai/api/organizations/${organizationId}/chat_conversations/${conversationId}/completion`, {
         ja3: JA3,
         userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36',
         body: JSON.stringify(req.body),
